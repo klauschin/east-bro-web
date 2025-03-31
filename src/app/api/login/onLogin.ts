@@ -13,6 +13,7 @@ export async function onLogin(data: { username: string; password: string }) {
 			}),
 		});
 		const data = await res.json();
+		console.log('🚀 ~ :16 ~ onLogin ~ data:', data);
 
 		return data;
 	} catch (error) {

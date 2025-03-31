@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -9,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import {
 	Form,
 	FormControl,
-	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
@@ -27,6 +27,16 @@ const formSchema = z.object({
 });
 
 export function LoginForm({ className = '' }) {
+	const [statusMessage, setStatusMessage] = useState('');
+	const [userData, setUserData] = useState({
+		token: '',
+		type: '',
+		refreshToken: '',
+		id: '',
+		username: '',
+		email: '',
+		roles: [],
+	});
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -36,10 +46,17 @@ export function LoginForm({ className = '' }) {
 	});
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
+		setStatusMessage('');
 		const res = await onLogin(values);
-		console.log('🚀 ~ :40 ~ onSubmit ~ res:', res);
+		console.log('🚀 ~ :42 ~ onSubmit ~ res:', res);
+		if (res.errors) {
+			return setStatusMessage('打錯密碼了智障');
+		}
+		setUserData(res);
 	}
-
+	if (userData.username) {
+		return <div>你好 {userData?.username}, 準備下斡旋了吧?</div>;
+	}
 	return (
 		<Form {...form}>
 			<form
@@ -66,11 +83,8 @@ export function LoginForm({ className = '' }) {
 						<FormItem>
 							<FormLabel>Password</FormLabel>
 							<FormControl>
-								<Input placeholder="password" {...field} />
+								<Input type="password" placeholder="password" {...field} />
 							</FormControl>
-							<FormDescription>
-								This is your public display name.
-							</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -78,6 +92,9 @@ export function LoginForm({ className = '' }) {
 				<Button type="submit" className="w-full">
 					Submit
 				</Button>
+				{statusMessage && (
+					<p className="font-sans text-amber-700">{statusMessage}</p>
+				)}
 			</form>
 		</Form>
 	);
